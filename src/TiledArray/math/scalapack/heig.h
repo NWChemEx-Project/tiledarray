@@ -34,7 +34,7 @@
 #include <scalapackpp/eigenvalue_problem/gevp.hpp>
 
 namespace TiledArray {
-
+namespace scalapack {
 /**
  *  @brief Solve the standard eigenvalue problem with ScaLAPACK
  *
@@ -55,50 +55,43 @@ namespace TiledArray {
  *  as std::vector and in TA format, respectively.
  */
 template <typename Array>
-auto heig( const Array& A, size_t NB = 128, TiledRange evec_trange = TiledRange() ) {
-
+auto heig(const Array& A, size_t NB = 128,
+          TiledRange evec_trange = TiledRange()) {
   using value_type = typename Array::element_type;
-  using real_type  = scalapackpp::detail::real_t<value_type>;
+  using real_type = scalapackpp::detail::real_t<value_type>;
 
   auto& world = A.world();
   auto world_comm = world.mpi.comm().Get_mpi_comm();
-  //auto world_comm = MPI_COMM_WORLD;
+  // auto world_comm = MPI_COMM_WORLD;
   blacspp::Grid grid = blacspp::Grid::square_grid(world_comm);
 
-  world.gop.fence(); // stage ScaLAPACK execution
-  auto matrix = array_to_block_cyclic( A, grid, NB, NB );
-  world.gop.fence(); // stage ScaLAPACK execution
+  world.gop.fence();  // stage ScaLAPACK execution
+  auto matrix = array_to_block_cyclic(A, grid, NB, NB);
+  world.gop.fence();  // stage ScaLAPACK execution
 
   auto [M, N] = matrix.dims();
-  if( M != N )
-    throw std::runtime_error("Matrix must be square for EVP");
+  if (M != N) throw std::runtime_error("Matrix must be square for EVP");
 
   auto [Mloc, Nloc] = matrix.dist().get_local_dims(N, N);
   auto desc = matrix.dist().descinit_noerror(N, N, Mloc);
 
-  std::vector<real_type>        evals( N );
-  BlockCyclicMatrix<value_type> evecs( world, grid, N, N, NB, NB );
+  std::vector<real_type> evals(N);
+  BlockCyclicMatrix<value_type> evecs(world, grid, N, N, NB, NB);
 
   auto info = scalapackpp::hereig(
-    scalapackpp::VectorFlag::Vectors, blacspp::Triangle::Lower, N,
-    matrix.local_mat().data(), 1, 1, desc, evals.data(),
-    evecs.local_mat().data(), 1, 1, desc );
+      scalapackpp::VectorFlag::Vectors, blacspp::Triangle::Lower, N,
+      matrix.local_mat().data(), 1, 1, desc, evals.data(),
+      evecs.local_mat().data(), 1, 1, desc);
   if (info) throw std::runtime_error("EVP Failed");
 
-  if( evec_trange.rank() == 0 ) evec_trange = A.trange();
+  if (evec_trange.rank() == 0) evec_trange = A.trange();
 
   world.gop.fence();
-  auto evecs_ta = block_cyclic_to_array<Array>( evecs, evec_trange );
+  auto evecs_ta = block_cyclic_to_array<Array>(evecs, evec_trange);
   world.gop.fence();
 
-
-  return std::tuple( evals, evecs_ta );
-
+  return std::tuple(evals, evecs_ta);
 }
-
-
-
-
 
 /**
  *  @brief Solve the generalized eigenvalue problem with ScaLAPACK
@@ -125,55 +118,49 @@ auto heig( const Array& A, size_t NB = 128, TiledRange evec_trange = TiledRange(
  *  as std::vector and in TA format, respectively.
  */
 template <typename Array>
-auto heig( const Array& A, const Array& B, 
-  size_t NB = 128, TiledRange evec_trange = TiledRange() ) {
-
+auto heig(const Array& A, const Array& B, size_t NB = 128,
+          TiledRange evec_trange = TiledRange()) {
   using value_type = typename Array::element_type;
-  using real_type  = scalapackpp::detail::real_t<value_type>;
+  using real_type = scalapackpp::detail::real_t<value_type>;
 
   auto& world = A.world();
   auto world_comm = world.mpi.comm().Get_mpi_comm();
-  //auto world_comm = MPI_COMM_WORLD;
+  // auto world_comm = MPI_COMM_WORLD;
   blacspp::Grid grid = blacspp::Grid::square_grid(world_comm);
 
-  world.gop.fence(); // stage ScaLAPACK execution
-  auto A_sca = array_to_block_cyclic( A, grid, NB, NB );
-  auto B_sca = array_to_block_cyclic( B, grid, NB, NB );
-  world.gop.fence(); // stage ScaLAPACK execution
+  world.gop.fence();  // stage ScaLAPACK execution
+  auto A_sca = array_to_block_cyclic(A, grid, NB, NB);
+  auto B_sca = array_to_block_cyclic(B, grid, NB, NB);
+  world.gop.fence();  // stage ScaLAPACK execution
 
   auto [M, N] = A_sca.dims();
-  if( M != N )
-    throw std::runtime_error("Matrix must be square for EVP");
+  if (M != N) throw std::runtime_error("Matrix must be square for EVP");
 
   auto [B_M, B_N] = B_sca.dims();
-  if( B_M != M or B_N != N )
+  if (B_M != M or B_N != N)
     throw std::runtime_error("A and B must have the same dimensions");
 
   auto [Mloc, Nloc] = A_sca.dist().get_local_dims(N, N);
   auto desc = A_sca.dist().descinit_noerror(N, N, Mloc);
 
-  std::vector<real_type>        evals( N );
-  BlockCyclicMatrix<value_type> evecs( world, grid, N, N, NB, NB );
+  std::vector<real_type> evals(N);
+  BlockCyclicMatrix<value_type> evecs(world, grid, N, N, NB, NB);
 
   auto info = scalapackpp::hereig_gen(
-    scalapackpp::VectorFlag::Vectors, blacspp::Triangle::Lower, N,
-    A_sca.local_mat().data(), 1, 1, desc, 
-    B_sca.local_mat().data(), 1, 1, desc, 
-    evals.data(),
-    evecs.local_mat().data(), 1, 1, desc );
+      scalapackpp::VectorFlag::Vectors, blacspp::Triangle::Lower, N,
+      A_sca.local_mat().data(), 1, 1, desc, B_sca.local_mat().data(), 1, 1,
+      desc, evals.data(), evecs.local_mat().data(), 1, 1, desc);
   if (info) throw std::runtime_error("EVP Failed");
 
-  if( evec_trange.rank() == 0 ) evec_trange = A.trange();
+  if (evec_trange.rank() == 0) evec_trange = A.trange();
 
   world.gop.fence();
-  auto evecs_ta = block_cyclic_to_array<Array>( evecs, evec_trange );
+  auto evecs_ta = block_cyclic_to_array<Array>(evecs, evec_trange);
   world.gop.fence();
 
-
-  return std::tuple( evals, evecs_ta );
-
+  return std::tuple(evals, evecs_ta);
 }
-
+}
 } // namespace TiledArray
 
 #endif // TILEDARRAY_HAS_SCALAPACK
