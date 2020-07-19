@@ -1,61 +1,101 @@
 #ifndef TILEDARRAY_MATH_LAPACK_HEIG_H__INCLUDED
 #define TILEDARRAY_MATH_LAPACK_HEIG_H__INCLUDED
-#include "TiledArray/conversions/retile.h"
+#include "TiledArray/conversions/eigen.h"
 
-namespace TiledArray {
-namespace lapack {
+namespace TiledArray::lapack {
 
 template <typename Array>
 auto heig(const Array& A) {
   using tensor_type = Array;
+  using numeric_type = typename tensor_type::numeric_type;
   using tile_type = typename tensor_type::value_type;
 
   auto& world = A.world();
 
-  const auto& erange = A.elements_range();
-  const auto nrows = erange.hi(0);
-  const auto ncols = erange.hi(1);
+  auto A_eigen = array_to_eigen(A);
+  const int nrows = A_eigen.rows();
+  const int ncols = A_eigen.cols();
 
-  TA::TiledRange matrix_tile{{0, nrows}, {0, ncols}};
-  auto A_large_tile = retile(A, matrix_tile);
-  tile_type evec_buffer;
-  tile_type eval_buffer;
+  int lwork = 1 + 6 * nrows + 2 * nrows * nrows;
+  int info;
+  std::vector<numeric_type> work(lwork);
+  std::vector<numeric_type> eval_buffer(nrows);
 
-  if (A_large_tile.is_local({0, 0})) {
-    eval_buffer = tile_type(TA::Range{nrows}, 0.0);
-    evec_buffer = A_large_tile.find({0, 0}).get();
-    int lwork = 1 + 6 * nrows + 2 * nrows * nrows;
-    int info;
-    std::vector<double> work(lwork);
-    dsyev("V", "U", &nrows, evec_buffer.data(), &ncols, eval_buffer.data(),
+  if constexpr(std::is_same_v<numeric_type, double>) {
+    dsyev("V", "U", &nrows, A_eigen.data(), &ncols, eval_buffer.data(),
           work.data(), &lwork, &info);
-    auto row_major = evec_buffer.permute(TA::Permutation{1, 0});
-    evec_buffer = row_major;
+  }
+  else {
+    TA_EXCEPTION("Your numeric type is not hooked up at the moment");
   }
 
-  auto l = [=](tile_type& tile, const auto&) {
-    tile = evec_buffer;
+  const auto& matrix_trange = A.trange();
+  TiledRange vector_trange{matrix_trange.dim(0)};
+
+  auto evecs =
+    column_major_buffer_to_array<tensor_type>(world, matrix_trange,
+                                                A_eigen.data(), nrows, ncols);
+
+  auto l = [=](tile_type& tile, const auto& range) {
+    tile_type buffer(range);
+    for(auto i : range) buffer[i] = eval_buffer[i[0]];
+    tile = buffer;
     return tile.norm();
   };
+  auto evals = make_array<tensor_type>(world, vector_trange, l);
 
-  auto m = [=](tile_type& tile, const auto&) {
-    tile = eval_buffer;
+  return std::tuple(evals, evecs);
+}
+
+template <typename Array>
+auto heig(const Array& A, const Array& B) {
+  using tensor_type = Array;
+  using numeric_type = typename tensor_type::numeric_type;
+  using tile_type = typename tensor_type::value_type;
+
+  auto& world = A.world();
+
+  auto A_eigen = array_to_eigen(A);
+  auto B_eigen = array_to_eigen(B);
+  const int nrows = A_eigen.rows();
+  const int ncols = A_eigen.cols();
+
+  int lwork = 1 + 6 * nrows + 2 * nrows * nrows;
+  int liwork = 3 + 5 * nrows;
+  int info;
+  std::vector<numeric_type> work(lwork);
+  std::vector<numeric_type> eval_buffer(nrows);
+  std::vector<int> iwork(liwork);
+
+  if constexpr(std::is_same_v<numeric_type, double>) {
+    int one = 1;
+
+    dsygvd(&one, "V", "U", &nrows, A_eigen.data(), &ncols, B_eigen.data(),
+           &ncols, eval_buffer.data(), work.data(), &lwork, iwork.data(),
+           &liwork, &info);
+  }
+  else {
+    TA_EXCEPTION("Your numeric type is not hooked up at the moment");
+  }
+
+  const auto& matrix_trange = A.trange();
+  TiledRange vector_trange{matrix_trange.dim(0)};
+
+  auto evecs =
+      column_major_buffer_to_array<tensor_type>(world, matrix_trange,
+                                                A_eigen.data(), nrows, ncols);
+
+  auto l = [=](tile_type& tile, const auto& range) {
+    tile_type buffer(range);
+    for(auto i : range) buffer[i] = eval_buffer[i[0]];
+    tile = buffer;
     return tile.norm();
   };
+  auto evals = make_array<tensor_type>(world, vector_trange, l);
 
-  auto pmap = A_large_tile.pmap();
-
-  auto evecs = make_array<tensor_type>(world, matrix_tile, pmap, l);
-
-  auto evals = make_array<tensor_type>(
-      world, TA::TiledRange{matrix_tile.dim(0)}, pmap, m);
-
-  auto tiled_evecs = retile(evecs, A.trange());
-  auto tiled_evals = retile(evals, TA::TiledRange{A.trange().dim(0)});
-  return std::tuple(tiled_evals, tiled_evecs);
+  return std::tuple(evals, evecs);
 }
 
-}
-} // namespace TiledArray
+} // namespace TiledArray::lapack
 
 #endif

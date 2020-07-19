@@ -8,22 +8,15 @@ namespace TiledArray {
 
 template<typename Array>
 auto heig(const Array& A) {
-  // TODO: Check if tensor is distributed, if not don't use SCALAPACK
-
-#if TILEDARRAY_HAS_SCALAPACK
-  return scalapack::heig(A);
-#else
-  return lapack::heig(A);
+  return detail::use_scalapack(A) ? scalapack::heig(A) : lapack::heig(A);
 }
 
 template<typename Array>
 auto heig(const Array& A, const Array& B) {
-  // TODO: Check if tensor is distributed, if not don't use SCALAPACK
-
-#if TILEDARRAY_HAS_SCALAPACK
-  return scalapack::heig(A, B);
-#else
-  return lapack::heig(A, B);
+  return detail::use_scalapack(A, B) ?
+                                     scalapack::heig(A, B) : lapack::heig(A, B);
 }
 
 }
+
+#endif // TILEDARRAY_MATH_LINEAR_ALGEBRA_H__INCLUDED

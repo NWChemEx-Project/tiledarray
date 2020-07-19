@@ -25,9 +25,31 @@
 #ifndef TILEDARRAY_MATH_SCALAPACK_H__INCLUDED
 #define TILEDARRAY_MATH_SCALAPACK_H__INCLUDED
 
+#include <TiledArray/math/scalapack/heig.h>
+
+namespace TiledArray::detail {
+
+/// \brief Determines whether we should use the ScaLAPACK implementation of the
+///        linear algebra routine or not
+///
+/// @tparam TensorTypes The type of the tensors we are performing linear algebra
+///                     on. Expected to be TA::DistArray instances.
+/// @param ts
+/// @return
+template<typename...TensorTypes>
+bool use_scalapack(TensorTypes&&...ts) {
+  // TODO: Check if tensor ts are distributed, if not don't use SCALAPACK
+#if TILEDARRAY_HAS_SCALAPACK
+  return true;
+#else
+  return false;
+#endif
+}
+
+} //namespace TiledArray::detail
+
 #if TILEDARRAY_HAS_SCALAPACK
 
-#include <TiledArray/math/scalapack/heig.h>
 #include <TiledArray/math/scalapack/chol.h>
 #include <TiledArray/math/scalapack/svd.h>
 #include <TiledArray/math/scalapack/lu.h>

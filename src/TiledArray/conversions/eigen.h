@@ -638,7 +638,7 @@ inline A column_major_buffer_to_array(
   typedef Eigen::Matrix<typename A::value_type::value_type, Eigen::Dynamic,
                         Eigen::Dynamic, Eigen::ColMajor>
       matrix_type;
-  return eigen_to_array(
+  return eigen_to_array<A>(
       world, trange,
       Eigen::Map<const matrix_type, Eigen::AutoAlign>(buffer, m, n),
       replicated);

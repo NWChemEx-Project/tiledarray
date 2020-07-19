@@ -33,8 +33,7 @@
 #include <scalapackpp/eigenvalue_problem/sevp.hpp>
 #include <scalapackpp/eigenvalue_problem/gevp.hpp>
 
-namespace TiledArray {
-namespace scalapack {
+namespace TiledArray::scalapack {
 /**
  *  @brief Solve the standard eigenvalue problem with ScaLAPACK
  *
@@ -160,8 +159,25 @@ auto heig(const Array& A, const Array& B, size_t NB = 128,
 
   return std::tuple(evals, evecs_ta);
 }
-}
-} // namespace TiledArray
+
+} // namespace TiledArray::scalapack
 
 #endif // TILEDARRAY_HAS_SCALAPACK
+
+namespace TiledArray::scalapack {
+
+template <typename Array>
+auto heig(const Array& A, size_t NB = 128,
+          TiledRange evec_trange = TiledRange()) {
+  TA_EXCEPTION("TiledArray was built without ScaLAPACK.");
+}
+
+template <typename Array>
+auto heig(const Array& A, const Array& B, size_t NB = 128,
+          TiledRange evec_trange = TiledRange()) {
+  TA_EXCEPTION("TiledArray was built without ScaLAPACK.");
+}
+
+} // namespace TiledArray::scalapack
+
 #endif // TILEDARRAY_MATH_SCALAPACK_H__INCLUDED
