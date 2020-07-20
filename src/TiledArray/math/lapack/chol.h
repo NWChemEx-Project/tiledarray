@@ -26,7 +26,7 @@ auto cholesky_(const Array& A) {
   int ncols = A_eigen.cols();
   int info;
   if constexpr (std::is_same_v<numeric_type, double>) {
-    dpotrf("L", &nrows, A_eigen.data(), &ncols, &info);
+    dpotrf_("L", &nrows, A_eigen.data(), &ncols, &info);
   } else {
     TA_EXCEPTION("Your numeric type is not hooked up at the moment");
   }
@@ -59,7 +59,7 @@ auto cholesky_linv(const Array& A) {
   int ncols = L_eigen.cols();
   int info;
   if constexpr(std::is_same_v<numeric_type, double>){
-    dtrtri("L", "N", &nrows, L_eigen.data(), &ncols, &info);
+    dtrtri_("L", "N", &nrows, L_eigen.data(), &ncols, &info);
   } else {
     TA_EXCEPTION("Your numeric type is not hooked up at the moment");
   }
