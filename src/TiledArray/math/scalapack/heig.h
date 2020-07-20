@@ -162,7 +162,7 @@ auto heig(const Array& A, const Array& B, size_t NB = 128,
 
 } // namespace TiledArray::scalapack
 
-#endif // TILEDARRAY_HAS_SCALAPACK
+#else // TILEDARRAY_HAS_SCALAPACK
 
 namespace TiledArray::scalapack {
 
@@ -180,4 +180,5 @@ auto heig(const Array& A, const Array& B, size_t NB = 128,
 
 } // namespace TiledArray::scalapack
 
+#endif // TILEDARRAY_HAS_SCALAPACK
 #endif // TILEDARRAY_MATH_SCALAPACK_H__INCLUDED

@@ -26,6 +26,7 @@
 #define TILEDARRAY_MATH_SCALAPACK_H__INCLUDED
 
 #include <TiledArray/math/scalapack/heig.h>
+#include <TiledArray/math/scalapack/chol.h>
 
 namespace TiledArray::detail {
 
@@ -50,7 +51,6 @@ bool use_scalapack(TensorTypes&&...ts) {
 
 #if TILEDARRAY_HAS_SCALAPACK
 
-#include <TiledArray/math/scalapack/chol.h>
 #include <TiledArray/math/scalapack/svd.h>
 #include <TiledArray/math/scalapack/lu.h>
 

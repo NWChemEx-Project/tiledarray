@@ -13,8 +13,20 @@ auto heig(const Array& A) {
 
 template<typename Array>
 auto heig(const Array& A, const Array& B) {
-  return detail::use_scalapack(A, B) ?
-                                     scalapack::heig(A, B) : lapack::heig(A, B);
+  const bool = scalapack = detail::use_scalapack(A, B);
+  return scalapack ? scalapack::heig(A, B) : lapack::heig(A, B);
+}
+
+template<typename Array>
+auto cholesky(const Array& A) {
+  const bool = scalapack = detail::use_scalapack(A);
+  return scalapack(A) ? scalapack::cholesky(A) : lapack::cholesky(A);
+}
+
+template<typename Array>
+auto cholesky_linv(const Array& A) {
+  const bool = scalapack = detail::use_scalapack(A);
+  return scalapack(A) ? scalapack::cholesky_linv(A) : lapack::cholesky_linv(A);
 }
 
 }
