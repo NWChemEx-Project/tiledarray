@@ -1,7 +1,7 @@
 #ifndef TILEDARRAY_MATH_LAPACK_CHOL_H__INCLUDED
 #define TILEDARRAY_MATH_LAPACK_CHOL_H__INCLUDED
 #include "TiledArray/conversions/eigen.h"
-
+#include <madness/tensor/clapack.h>
 namespace TiledArray::lapack {
 namespace detail {
 
