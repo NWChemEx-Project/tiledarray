@@ -106,6 +106,9 @@ TiledArray/external/btas.h
 TiledArray/math/blas.h
 TiledArray/math/eigen.h
 TiledArray/math/gemm_helper.h
+TiledArray/math/lapack/chol.h
+TiledArray/math/lapack/heig.h
+TiledArray/math/linear_algebra.h
 TiledArray/math/outer.h
 TiledArray/math/parallel_gemm.h
 TiledArray/math/partial_reduce.h
