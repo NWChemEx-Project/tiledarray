@@ -22,11 +22,11 @@ auto heig(const Array& A) {
   std::vector<numeric_type> evals(nrows);
 
   if constexpr(std::is_same_v<numeric_type, double>) {
-    dsyev("V", "U", &nrows, A_eigen.data(), &ncols, evals.data(),
+    dsyev_("V", "U", &nrows, A_eigen.data(), &ncols, evals.data(),
           work.data(), &lwork, &info);
     lwork = work[0];
     work = std::vector<numeric_type>(lwork);
-    dsyev("V", "U", &nrows, A_eigen.data(), &ncols, evals.data(),
+    dsyev_("V", "U", &nrows, A_eigen.data(), &ncols, evals.data(),
           work.data(), &lwork, &info);
   }
   else {
@@ -65,7 +65,7 @@ auto heig(const Array& A, const Array& B) {
   if constexpr(std::is_same_v<numeric_type, double>) {
     int one = 1;
     // First call gets optimial sizes
-    dsygvd(&one, "V", "U", &nrows, A_eigen.data(), &ncols, B_eigen.data(),
+    dsygvd_(&one, "V", "U", &nrows, A_eigen.data(), &ncols, B_eigen.data(),
            &ncols, evals.data(), work.data(), &lwork, iwork.data(),
            &liwork, &info);
     lwork = work[0];
@@ -73,7 +73,7 @@ auto heig(const Array& A, const Array& B) {
     work = std::vector<numeric_type>(lwork);
     iwork = std::vector<int>(liwork);
     // This call does the real work
-    dsygvd(&one, "V", "U", &nrows, A_eigen.data(), &ncols, B_eigen.data(),
+    dsygvd_(&one, "V", "U", &nrows, A_eigen.data(), &ncols, B_eigen.data(),
            &ncols, evals.data(), work.data(), &lwork, iwork.data(),
            &liwork, &info);
 
