@@ -59,13 +59,12 @@ auto cholesky_linv(const Array& A) {
   int ncols = L_eigen.cols();
   int info;
   if constexpr(std::is_same_v<numeric_type, double>){
-    dpotri("L", &nrows, L_eigen.data(), &ncols, &info);
+    dtrtri("L", "N", &nrows, L_eigen.data(), &ncols, &info);
   } else {
     TA_EXCEPTION("Your numeric type is not hooked up at the moment");
   }
-  // We only get the lower triangle back
   for(auto i = 0; i < nrows; ++i)
-    for(auto j = i + 1; j < ncols; ++j)L_eigen(i,j) = L_eigen(j, i);
+    for(auto j = i + 1; j < ncols; ++j) L_eigen(i,j) = 0.0;
 
   return column_major_buffer_to_array<tensor_type>(
       A.world(), A.trange(), L_eigen.data(), nrows, ncols);

@@ -282,19 +282,19 @@ auto cholesky_lsolve(scalapackpp::TransposeFlag trans, const Array& A,
 namespace TiledArray::scalapack {
 
 template <typename Array>
-auto cholesky(const Array& A, size_t NB = 128,
+Array cholesky(const Array& A, size_t NB = 128,
               TiledRange l_trange = TiledRange()) {
   TA_EXCEPTION("TiledArray was built without ScaLAPACK.");
 }
 
 template <typename Array, bool RetL = false>
-auto cholesky_linv(const Array& A, size_t NB = 128,
+Array cholesky_linv(const Array& A, size_t NB = 128,
                    TiledRange l_trange = TiledRange()) {
   TA_EXCEPTION("TiledArray was built without ScaLAPACK.");
 }
 
 template <typename Array>
-auto cholesky_solve(const Array& A, const Array& B, size_t NB = 128,
+Array cholesky_solve(const Array& A, const Array& B, size_t NB = 128,
                     TiledRange x_trange = TiledRange()) {
   TA_EXCEPTION("TiledArray was built without ScaLAPACK.");
 }

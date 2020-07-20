@@ -62,10 +62,10 @@ BOOST_AUTO_TEST_CASE(two_by_two) {
   auto& world = get_default_world();
   TiledRange trange{{0, 1, 2}, {0, 1, 2}};
   TSpArrayD a(world, trange, {{1.00, 1.00}, {1.00, 2.00}});
-  auto ainv = lapack::cholesky_linv(a);
-  std::cout << ainv << std::endl;
+  auto linv = lapack::cholesky_linv(a);
+  std::cout << linv << std::endl;
 
-  TSpArrayD ainv_corr(world, trange, {{2.0, -1.0}, {-1.0, 1.0}});
+  TSpArrayD ainv_corr(world, trange, {{1.0, 0.0}, {-1.0, 1.0}});
 }
 
 BOOST_AUTO_TEST_SUITE_END()
