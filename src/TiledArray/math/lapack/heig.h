@@ -19,14 +19,14 @@ auto heig(const Array& A) {
   int lwork = -1;
   int info;
   std::vector<numeric_type> work(1);
-  std::vector<numeric_type> eval_buffer(nrows);
+  std::vector<numeric_type> evals(nrows);
 
   if constexpr(std::is_same_v<numeric_type, double>) {
-    dsyev("V", "U", &nrows, A_eigen.data(), &ncols, eval_buffer.data(),
+    dsyev("V", "U", &nrows, A_eigen.data(), &ncols, evals.data(),
           work.data(), &lwork, &info);
     lwork = work[0];
     work = std::vector<numeric_type>(lwork);
-    dsyev("V", "U", &nrows, A_eigen.data(), &ncols, eval_buffer.data(),
+    dsyev("V", "U", &nrows, A_eigen.data(), &ncols, evals.data(),
           work.data(), &lwork, &info);
   }
   else {
@@ -39,15 +39,6 @@ auto heig(const Array& A) {
   auto evecs =
     column_major_buffer_to_array<tensor_type>(world, matrix_trange,
                                                 A_eigen.data(), nrows, ncols);
-
-  auto l = [=](tile_type& tile, const auto& range) {
-    tile_type buffer(range);
-    for(auto i : range) buffer[i] = eval_buffer[i[0]];
-    tile = buffer;
-    return tile.norm();
-  };
-  auto evals = make_array<tensor_type>(world, vector_trange, l);
-
   return std::tuple(evals, evecs);
 }
 
@@ -67,7 +58,7 @@ auto heig(const Array& A, const Array& B) {
   int lwork = -1;
   int liwork = -1;
   int info;
-  std::vector<numeric_type> eval_buffer(nrows);
+  std::vector<numeric_type> evals(nrows);
   std::vector<numeric_type> work(1);
   std::vector<int> iwork(1);
 
@@ -75,7 +66,7 @@ auto heig(const Array& A, const Array& B) {
     int one = 1;
     // First call gets optimial sizes
     dsygvd(&one, "V", "U", &nrows, A_eigen.data(), &ncols, B_eigen.data(),
-           &ncols, eval_buffer.data(), work.data(), &lwork, iwork.data(),
+           &ncols, evals.data(), work.data(), &lwork, iwork.data(),
            &liwork, &info);
     lwork = work[0];
     liwork = iwork[0];
@@ -83,7 +74,7 @@ auto heig(const Array& A, const Array& B) {
     iwork = std::vector<int>(liwork);
     // This call does the real work
     dsygvd(&one, "V", "U", &nrows, A_eigen.data(), &ncols, B_eigen.data(),
-           &ncols, eval_buffer.data(), work.data(), &lwork, iwork.data(),
+           &ncols, evals.data(), work.data(), &lwork, iwork.data(),
            &liwork, &info);
 
   }
@@ -97,14 +88,6 @@ auto heig(const Array& A, const Array& B) {
   auto evecs =
       column_major_buffer_to_array<tensor_type>(world, matrix_trange,
                                                 A_eigen.data(), nrows, ncols);
-
-  auto l = [=](tile_type& tile, const auto& range) {
-    tile_type buffer(range);
-    for(auto i : range) buffer[i] = eval_buffer[i[0]];
-    tile = buffer;
-    return tile.norm();
-  };
-  auto evals = make_array<tensor_type>(world, vector_trange, l);
 
   return std::tuple(evals, evecs);
 }

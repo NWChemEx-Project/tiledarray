@@ -167,13 +167,15 @@ auto heig(const Array& A, const Array& B, size_t NB = 128,
 namespace TiledArray::scalapack {
 
 template <typename Array>
-std::tuple<Array, Array> heig(const Array& A, size_t NB = 128,
+std::tuple<std::vector<typename Array::numeric_type>, Array>
+heig(const Array& A, size_t NB = 128,
           TiledRange evec_trange = TiledRange()) {
   TA_EXCEPTION("TiledArray was built without ScaLAPACK.");
 }
 
 template <typename Array>
-std::tuple<Array, Array> heig(const Array& A, const Array& B, size_t NB = 128,
+std::tuple<std::vector<typename Array::numeric_type>, Array>
+heig(const Array& A, const Array& B, size_t NB = 128,
           TiledRange evec_trange = TiledRange()) {
   TA_EXCEPTION("TiledArray was built without ScaLAPACK.");
 }
