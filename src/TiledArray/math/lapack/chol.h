@@ -25,7 +25,11 @@ auto cholesky_(const Array& A) {
   int nrows = A_eigen.rows();
   int ncols = A_eigen.cols();
   int info;
-  potrf_("L", &nrows, A_eigen.data(), &ncols, &info);
+  if constexpr (std::is_same_v<numeric_type, double>) {
+    dpotrf("L", &nrows, A_eigen.data(), &ncols, &info);
+  } else {
+    TA_EXCEPTION("Your numeric type is not hooked up at the moment");
+  }
 
   // I think I need to zero out the upper triangle, but I'm not 100% sure...
   for (auto i = 0; i < nrows; ++i)
@@ -54,8 +58,11 @@ auto cholesky_linv(const Array& A) {
   int nrows = L_eigen.rows();
   int ncols = L_eigen.cols();
   int info;
-  trtri_("L", "N", &nrows, L_eigen.data(), &ncols, &info);
-
+  if constexpr(std::is_same_v<numeric_type, double>){
+    dtrtri("L", "N", &nrows, L_eigen.data(), &ncols, &info);
+  } else {
+    TA_EXCEPTION("Your numeric type is not hooked up at the moment");
+  }
   for(auto i = 0; i < nrows; ++i)
     for(auto j = i + 1; j < ncols; ++j) L_eigen(i,j) = 0.0;
 
