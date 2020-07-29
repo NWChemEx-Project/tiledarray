@@ -2,6 +2,7 @@
 #define TILEDARRAY_MATH_LAPACK_CHOL_H__INCLUDED
 #include "TiledArray/conversions/eigen.h"
 #include <madness/tensor/clapack.h>
+#include <madness/tensor/linalg_wrappers.h>
 namespace TiledArray::lapack {
 namespace detail {
 
@@ -24,12 +25,15 @@ auto cholesky_(const Array& A) {
   auto A_eigen = array_to_eigen(A);
   int nrows = A_eigen.rows();
   int ncols = A_eigen.cols();
-  int info;
-  if constexpr (std::is_same_v<numeric_type, double>) {
-    dpotrf("L", &nrows, A_eigen.data(), &ncols, &info);
-  } else {
-    TA_EXCEPTION("Your numeric type is not hooked up at the moment");
-  }
+//  int info;
+
+  madness::cholesky('L', nrows, A_eigen.data(), ncols);
+
+//  if constexpr (std::is_same_v<numeric_type, double>) {
+//    dpotrf("L", &nrows, A_eigen.data(), &ncols, &info);
+//  } else {
+//    TA_EXCEPTION("Your numeric type is not hooked up at the moment");
+//  }
 
   // I think I need to zero out the upper triangle, but I'm not 100% sure...
   for (auto i = 0; i < nrows; ++i)
@@ -57,12 +61,12 @@ auto cholesky_linv(const Array& A) {
   auto L_eigen = detail::cholesky_(A);
   int nrows = L_eigen.rows();
   int ncols = L_eigen.cols();
-  int info;
-  if constexpr(std::is_same_v<numeric_type, double>){
-    dtrtri("L", "N", &nrows, L_eigen.data(), &ncols, &info);
-  } else {
-    TA_EXCEPTION("Your numeric type is not hooked up at the moment");
-  }
+//  int info;
+//  if constexpr(std::is_same_v<numeric_type, double>){
+//    dtrtri("L", "N", &nrows, L_eigen.data(), &ncols, &info);
+//  } else {
+//    TA_EXCEPTION("Your numeric type is not hooked up at the moment");
+//  }
   for(auto i = 0; i < nrows; ++i)
     for(auto j = i + 1; j < ncols; ++j) L_eigen(i,j) = 0.0;
 
