@@ -524,7 +524,7 @@ class VariableList {
 template<typename T, typename...Args>
 auto all_annotations(T&& v, Args&&...args) {
   std::set<std::string> rv;
-  if constexpr(sizeof...(Args)){
+  if constexpr(!!sizeof...(Args)){
     rv = all_annotations(std::forward<Args>(args)...);
   }
   rv.insert(v.begin(), v.end());
@@ -535,7 +535,7 @@ auto all_annotations(T&& v, Args&&...args) {
 template<typename T, typename...Args>
 auto common_annotations(T&& v, Args&&...args) {
   std::set<std::string> rv;
-  if constexpr(sizeof...(Args)) {
+  if constexpr(!!sizeof...(Args)) {
     rv = common_annotations(std::forward<Args>(args)...);
     // Remove all annotations not found in v
     decltype(rv) buffer(rv);

@@ -26,17 +26,29 @@ auto cholesky_(const Array& A) {
   auto A_eigen = array_to_eigen(A);
   int nrows = A_eigen.rows();
   int ncols = A_eigen.cols();
-//  int info;
+  if( nrows != ncols ) TA_EXCEPTION("Cholesky Requires Square");
 
-  madness::cholesky('L', nrows, A_eigen.data(), ncols);
-
-//  if constexpr (std::is_same_v<numeric_type, double>) {
-//    dpotrf("L", &nrows, A_eigen.data(), &ncols, &info);
-//  } else {
-//    TA_EXCEPTION("Your numeric type is not hooked up at the moment");
-//  }
+  madness::cholesky('L', nrows, A_eigen.data(), nrows);
 
   // I think I need to zero out the upper triangle, but I'm not 100% sure...
+  for (auto i = 0; i < nrows; ++i)
+    for (auto j = i + 1; j < ncols; ++j) A_eigen(i, j) = 0.0;
+  return A_eigen;
+}
+
+template <typename Array>
+auto cholesky_linv_( const Array& A ) {
+  using tensor_type = Array;
+  using numeric_type = typename tensor_type::numeric_type;
+
+  auto A_eigen = array_to_eigen(A);
+  int nrows = A_eigen.rows();
+  int ncols = A_eigen.cols();
+  if( nrows != ncols ) TA_EXCEPTION("Cholesky Requires Square");
+
+  madness::cholesky('L', nrows, A_eigen.data(), nrows);
+  madness::trtri('L', 'N', nrows, A_eigen.data(), nrows);
+
   for (auto i = 0; i < nrows; ++i)
     for (auto j = i + 1; j < ncols; ++j) A_eigen(i, j) = 0.0;
   return A_eigen;
@@ -57,22 +69,10 @@ auto cholesky(const Array& A) {
 template<typename Array>
 auto cholesky_linv(const Array& A) {
   using tensor_type = Array;
-  using numeric_type = typename tensor_type::numeric_type;
-
-  auto L_eigen = detail::cholesky_(A);
-  int nrows = L_eigen.rows();
-  int ncols = L_eigen.cols();
-//  int info;
-//  if constexpr(std::is_same_v<numeric_type, double>){
-//    dtrtri("L", "N", &nrows, L_eigen.data(), &ncols, &info);
-//  } else {
-//    TA_EXCEPTION("Your numeric type is not hooked up at the moment");
-//  }
-  for(auto i = 0; i < nrows; ++i)
-    for(auto j = i + 1; j < ncols; ++j) L_eigen(i,j) = 0.0;
-
+  auto Linv_eigen = detail::cholesky_linv_(A);
+  const auto nrows = A.elements_range().upbound(0);
   return column_major_buffer_to_array<tensor_type>(
-      A.world(), A.trange(), L_eigen.data(), nrows, ncols);
+      A.world(), A.trange(), Linv_eigen.data(), nrows, nrows);
 }
 
 template<typename Array>
