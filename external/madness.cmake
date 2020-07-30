@@ -399,7 +399,7 @@ else()
   # TiledArray only needs MADworld library compiled to be ...
   # as long as you mark dependence on it correcty its target properties
   # will be used correctly (header locations, etc.)
-  set(MADNESS_WORLD_LIBRARY MADworld)
+  set(MADNESS_WORLD_LIBRARY MADworld MADlinalg)
   if (BUILD_SHARED_LIBS)
     set(MADNESS_DEFAULT_LIBRARY_SUFFIX ${CMAKE_SHARED_LIBRARY_SUFFIX})
     set(MADNESS_EL_DEFAULT_LIBRARY_ABI_SUFFIX ".88-dev")
