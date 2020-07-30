@@ -132,7 +132,7 @@ else()
         "Path to the MADNESS source directory")
   set(MADNESS_BINARY_DIR "${PROJECT_BINARY_DIR}/external/madness-build" CACHE PATH
         "Path to the MADNESS build directory")
-  set(MADNESS_URL "https://github.com/m-a-d-n-e-s-s/madness.git" CACHE STRING 
+  set(MADNESS_URL "https://github.com/NWChemEx-Project/madness.git" CACHE STRING 
         "Path to the MADNESS repository")
   set(MADNESS_TAG "${MADNESS_OLDEST_TAG}" CACHE STRING
         "Revision hash or tag to use when building MADNESS")

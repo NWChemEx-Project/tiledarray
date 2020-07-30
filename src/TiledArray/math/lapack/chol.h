@@ -2,11 +2,8 @@
 #define TILEDARRAY_MATH_LAPACK_CHOL_H__INCLUDED
 #include "TiledArray/conversions/eigen.h"
 #include <madness/tensor/clapack.h>
-
-#ifndef MADLINALG_INCLUDED
-#define MADLINALG_INCLUDED
 #include <madness/tensor/linalg_wrappers.h>
-#endif
+
 namespace TiledArray::lapack {
 namespace detail {
 
