@@ -18,24 +18,9 @@ auto heig(const Array& A) {
   const int nrows = A_eigen.rows();
   const int ncols = A_eigen.cols();
 
-//  int lwork = -1;
-//  int info;
-//  std::vector<numeric_type> work(1);
   std::vector<numeric_type> evals(nrows);
 
   madness::hereig('V', 'U', nrows, A_eigen.data(), ncols, evals.data());
-
-//  if constexpr(std::is_same_v<numeric_type, double>) {
-//    dsyev("V", "U", &nrows, A_eigen.data(), &ncols, evals.data(),
-//          work.data(), &lwork, &info);
-//    lwork = work[0];
-//    work = std::vector<numeric_type>(lwork);
-//    dsyev("V", "U", &nrows, A_eigen.data(), &ncols, evals.data(),
-//          work.data(), &lwork, &info);
-//  }
-//  else {
-//    TA_EXCEPTION("Your numeric type is not hooked up at the moment");
-//  }
 
   const auto& matrix_trange = A.trange();
   TiledRange vector_trange{matrix_trange.dim(0)};
@@ -59,36 +44,11 @@ auto heig(const Array& A, const Array& B) {
   const int nrows = A_eigen.rows();
   const int ncols = A_eigen.cols();
 
-//  int lwork = -1;
-//  int liwork = -1;
-//  int info;
   std::vector<numeric_type> evals(nrows);
-//  std::vector<numeric_type> work(1);
-//  std::vector<int> iwork(1);
 
   int one = 1;
   madness::hereig_gen(one, 'V', 'U', nrows, A_eigen.data(), ncols, B_eigen.data(),
                       ncols, evals.data());
-
-//  if constexpr(std::is_same_v<numeric_type, double>) {
-//    int one = 1;
-//    // First call gets optimial sizes
-//    dsygvd(&one, "V", "U", &nrows, A_eigen.data(), &ncols, B_eigen.data(),
-//           &ncols, evals.data(), work.data(), &lwork, iwork.data(),
-//           &liwork, &info);
-//    lwork = work[0];
-//    liwork = iwork[0];
-//    work = std::vector<numeric_type>(lwork);
-//    iwork = std::vector<int>(liwork);
-//    // This call does the real work
-//    dsygvd(&one, "V", "U", &nrows, A_eigen.data(), &ncols, B_eigen.data(),
-//           &ncols, evals.data(), work.data(), &lwork, iwork.data(),
-//           &liwork, &info);
-//
-//  }
-//  else {
-//    TA_EXCEPTION("Your numeric type is not hooked up at the moment");
-//  }
 
   const auto& matrix_trange = A.trange();
   TiledRange vector_trange{matrix_trange.dim(0)};
