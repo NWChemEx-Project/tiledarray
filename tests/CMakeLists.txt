@@ -96,20 +96,20 @@ set(ta_test_src_files  ta_test.cpp
     initializer_list.cpp
     diagonal_array.cpp
     retile.cpp
-    tot_dist_array_part1.cpp
-    tot_dist_array_part2.cpp
+    #tot_dist_array_part1.cpp
+    #tot_dist_array_part2.cpp
     random.cpp
     trace.cpp
-    tot_expressions.cpp
+    #tot_expressions.cpp
     annotation.cpp
     diagonal_array.cpp
     contraction_helpers.cpp
-    s_t_t_contract_.cpp
-    t_t_t_contract_.cpp
-    t_s_t_contract_.cpp
-    t_tot_tot_contract_.cpp
-    tot_tot_tot_contract_.cpp
-    einsum.cpp
+    #s_t_t_contract_.cpp
+    #t_t_t_contract_.cpp
+    #t_s_t_contract_.cpp
+    #t_tot_tot_contract_.cpp
+    #tot_tot_tot_contract_.cpp
+    #einsum.cpp
     lapack.cpp
 )
 
@@ -123,7 +123,7 @@ endif(TARGET TiledArray_SCALAPACK)
 
 # if tiledarray library was compiled without exceptions, use TA header-only (see below)
 if (NOT TA_DEFAULT_ERROR EQUAL 1 AND NOT CUDA_FOUND)
-  add_ta_executable(${executable} "${ta_test_src_files}" "MADworld;${TILEDARRAY_PRIVATE_LINK_LIBRARIES}")
+  add_ta_executable(${executable} "${ta_test_src_files}" "MADworld;MADlinalg;${TILEDARRAY_PRIVATE_LINK_LIBRARIES}")
   target_compile_definitions(${executable} PRIVATE TILEDARRAY_HEADER_ONLY=1)
   if (LAPACK_INCLUDE_DIRS)
     target_include_directories(${executable} PRIVATE ${LAPACK_INCLUDE_DIRS})

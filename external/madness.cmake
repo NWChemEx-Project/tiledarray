@@ -389,9 +389,12 @@ else()
 
   set(MADNESS_DIR ${MADNESS_BINARY_DIR})
   find_package_regimport(MADNESS ${TA_TRACKED_MADNESS_VERSION} CONFIG REQUIRED
-                         COMPONENTS world HINTS ${MADNESS_BINARY_DIR})
+                         COMPONENTS world linalg HINTS ${MADNESS_BINARY_DIR})
   if (NOT TARGET MADworld)
     message(FATAL_ERROR "Did not receive target MADworld")
+  endif()
+  if (NOT TARGET MADlinalg)
+    message(FATAL_ERROR "Did not receive target MADlinalg")
   endif()
   set(TILEDARRAY_DOWNLOADED_MADNESS ON CACHE BOOL "Whether TA downloaded MADNESS")
   mark_as_advanced(TILEDARRAY_DOWNLOADED_MADNESS)
@@ -399,7 +402,8 @@ else()
   # TiledArray only needs MADworld library compiled to be ...
   # as long as you mark dependence on it correcty its target properties
   # will be used correctly (header locations, etc.)
-  set(MADNESS_WORLD_LIBRARY MADworld MADlinalg)
+  set(MADNESS_WORLD_LIBRARY  MADworld )
+  set(MADNESS_LINALG_LIBRARY MADlinalg)
   if (BUILD_SHARED_LIBS)
     set(MADNESS_DEFAULT_LIBRARY_SUFFIX ${CMAKE_SHARED_LIBRARY_SUFFIX})
     set(MADNESS_EL_DEFAULT_LIBRARY_ABI_SUFFIX ".88-dev")
@@ -407,7 +411,7 @@ else()
     set(MADNESS_DEFAULT_LIBRARY_SUFFIX ${CMAKE_STATIC_LIBRARY_SUFFIX})
     set(MADNESS_EL_DEFAULT_LIBRARY_ABI_SUFFIX "")
   endif(BUILD_SHARED_LIBS)
-  set(MADNESS_LIBRARIES ${MADNESS_WORLD_LIBRARY})
+  set(MADNESS_LIBRARIES ${MADNESS_WORLD_LIBRARY} ${MADNESS_LINALG_LIBRARY})
 
 # BUT it also need cblas/clapack headers ... these are not packaged into a library with a target
   # these headers depend on LAPACK which is a dependency of MADlinalg, hence
@@ -416,10 +420,13 @@ else()
 
   # custom target for building MADNESS components .. only MADworld here! Headers from MADlinalg do not need compilation
   # N.B. Ninja needs spelling out the byproducts of custom targets, see https://cmake.org/cmake/help/v3.3/policy/CMP0058.html
-  set(MADNESS_BUILD_BYPRODUCTS "${MADNESS_BINARY_DIR}/src/madness/world/lib${MADNESS_WORLD_LIBRARY}${CMAKE_STATIC_LIBRARY_SUFFIX}")
+  set(MADNESS_BUILD_BYPRODUCTS 
+    "${MADNESS_BINARY_DIR}/src/madness/world/lib${MADNESS_WORLD_LIBRARY}${CMAKE_STATIC_LIBRARY_SUFFIX}"
+    "${MADNESS_BINARY_DIR}/src/madness/tensor/lib${MADNESS_LINALG_LIBRARY}${CMAKE_STATIC_LIBRARY_SUFFIX}"
+  )
   message(STATUS "custom target build-madness is expected to build these byproducts: ${MADNESS_BUILD_BYPRODUCTS}")
   add_custom_target(build-madness ALL
-      COMMAND ${CMAKE_COMMAND} --build . --target ${MADNESS_WORLD_LIBRARY}
+      COMMAND ${CMAKE_COMMAND} --build . --target ${MADNESS_WORLD_LIBRARY} ${MADNESS_LINALG_LIBRARY}
       WORKING_DIRECTORY ${MADNESS_BINARY_DIR}
       BYPRODUCTS "${MADNESS_BUILD_BYPRODUCTS}"
       COMMENT Building 'madness')

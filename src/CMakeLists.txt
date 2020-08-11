@@ -204,7 +204,7 @@ TiledArray/util/bug.cpp
 )
 
 # the list of libraries on which TiledArray depends on, will be cached later
-set(_TILEDARRAY_DEPENDENCIES MADworld TiledArray_Eigen BTAS::BTAS)
+set(_TILEDARRAY_DEPENDENCIES MADworld MADlinalg TiledArray_Eigen BTAS::BTAS)
 
 # TODO better ways to handle tiledarray cuda dependency
 if(CUDA_FOUND)
@@ -245,7 +245,7 @@ add_library(tiledarray ${TILEDARRAY_SOURCE_FILES} ${TILEDARRAY_HEADER_FILES})
       )
 
   target_link_libraries(${targetname} PUBLIC ${TILEDARRAY_PRIVATE_LINK_LIBRARIES})
-  target_link_libraries(${targetname} PUBLIC MADworld)
+  target_link_libraries(${targetname} PUBLIC MADworld MADlinalg)
 
   if (TARGET build-madness)
     add_dependencies(${targetname} build-madness)
