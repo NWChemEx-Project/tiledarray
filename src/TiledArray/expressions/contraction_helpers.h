@@ -595,6 +595,11 @@ void einsum(TsrExpr<ResultType, true> out,
             tile = kernels::tot_t_tot_contract_(ovars, lvars, rvars, ltile, rtile);
           else
             tile += kernels::tot_t_tot_contract_(ovars, lvars, rvars, ltile, rtile);
+        } else if constexpr(!out_is_tot && !lhs_is_tot && !rhs_is_tot){
+          if(tile.empty())
+            tile = kernels::t_t_t_contract_(ovars, lvars, rvars, ltile, rtile);
+          else
+            tile += kernels::t_t_t_contract_(ovars, lvars, rvars, ltile, rtile);
         } else {
           TA_ASSERT(false);  // Your kernel isn't supported
         }
