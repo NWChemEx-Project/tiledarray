@@ -23,6 +23,7 @@
 #include "TiledArray/expressions/tsr_expr.h"
 #include "TiledArray/expressions/variable_list.h"
 #include "TiledArray/tensor/tensor.h"
+#include "TiledArray/conversions/make_array.h"
 
 namespace TiledArray::expressions {
 
@@ -563,7 +564,7 @@ void einsum(TsrExpr<ResultType, true> out,
       trange_from_annotation(bound_vars, lhs_ovars, rhs_ovars, ltensor, rtensor);
 
 
-  auto l = [=](auto& tile, const TA::Range& r){
+  auto l = [=](auto& tile, const TiledArray::Range& r){
 
     const auto oidx =
         orange.tiles_range().idx(orange.element_to_tile(r.lobound()));
@@ -603,7 +604,7 @@ void einsum(TsrExpr<ResultType, true> out,
     return !tile.empty() ? tile.norm() : 0.0;
   };
 
-  auto rv = make_array<ResultType>(ltensor.world(), orange, l);
+  auto rv = TiledArray::make_array<ResultType>(ltensor.world(), orange, l);
   out.array() = rv;
   ltensor.world().gop.fence();
 }
