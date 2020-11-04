@@ -604,7 +604,7 @@ void einsum(TsrExpr<ResultType, true> out,
     return !tile.empty() ? tile.norm() : 0.0;
   };
 
-  auto rv = TiledArray::make_array<ResultType>(ltensor.world(), orange, l);
+  auto rv = make_array<ResultType>(ltensor.world(), orange, l);
   out.array() = rv;
   ltensor.world().gop.fence();
 }
